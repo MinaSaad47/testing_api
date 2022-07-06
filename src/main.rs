@@ -1,12 +1,12 @@
 #![allow(dead_code)]
 
 use std::{
-    time::Duration,
     collections::HashMap,
     sync::{
         atomic::{AtomicU32, Ordering},
         Arc,
     },
+    time::Duration,
 };
 
 use rocket::{
@@ -29,14 +29,41 @@ struct User {
     id: u32,
     #[serde(default)]
     name: String,
-    #[serde(default)]
-    first_name: String,
-    #[serde(default)]
-    last_name: String,
-    #[serde(default)]
-    age: u32,
-    password: Arc<String>,
     email: Arc<String>,
+    password: Arc<String>,
+    #[serde(default)]
+    image: String,
+    #[serde(default)]
+    points: i32,
+    #[serde(default)]
+    credit: i32,
+    #[serde(default)]
+    token: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+#[serde(crate = "rocket::serde")]
+struct Response {
+    status: bool,
+    message: String,
+    data: Option<User>,
+}
+
+impl Response {
+    async fn from_database(db: &DataBase, email: Arc<String>, password: Arc<String>) -> Self {
+        db.read().await.get(&(email, password)).map_or_else(
+            || Response {
+                status: false,
+                message: "Could not log in, please be certain of the entered data".to_string(),
+                data: None,
+            },
+            |user| Response {
+                status: true,
+                message: "logged in successfully".to_string(),
+                data: Some(user.clone()),
+            },
+        )
+    }
 }
 
 #[post("/register", format = "json", data = "<user>")]
@@ -70,13 +97,10 @@ async fn register_handler(
 }
 
 #[post("/login", format = "json", data = "<user>")]
-async fn login_handler(user: Json<User>, db: &State<DataBase>) -> Option<Json<User>> {
-    time::sleep(Duration::from_secs(3)).await; // simulate remote server.
+async fn login_handler(user: Json<User>, db: &State<DataBase>) -> Json<Response> {
+    time::sleep(Duration::from_secs(1)).await; // simulate remote server.
     let user = user.into_inner();
-    db.read()
-        .await
-        .get(&(user.email, user.password))
-        .map(|v| Json(v.clone()))
+    Json(Response::from_database(db, user.email, user.password).await)
 }
 
 #[launch]
