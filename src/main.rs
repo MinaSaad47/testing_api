@@ -30,6 +30,8 @@ struct User {
     #[serde(default)]
     name: String,
     email: Arc<String>,
+    #[serde(default)]
+    phone: String,
     password: Arc<String>,
     #[serde(default)]
     image: String,
