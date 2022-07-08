@@ -14,8 +14,10 @@ extern crate rocket;
 async fn launch() -> _ {
     let login_model = DB::<String, LoginModel>::from_json("login_model.json")
         .await
-        .unwrap();
-    let home_model = HomeModel::from_json("home_model.json").await.unwrap();
+        .unwrap_or_default();
+    let home_model = HomeModel::from_json("home_model.json")
+        .await
+        .unwrap_or_default();
     rocket::build()
         .mount(
             "/api",

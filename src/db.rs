@@ -1,9 +1,6 @@
 use rocket::{
     serde::{Deserialize, DeserializeOwned, Serialize},
-    tokio::{
-        fs::File,
-        io::{self, AsyncReadExt, AsyncWriteExt, BufReader, BufWriter},
-    },
+    tokio::io,
 };
 
 use std::{
@@ -13,7 +10,9 @@ use std::{
     path::Path,
 };
 
-#[derive(Debug, Serialize, Deserialize)]
+use crate::utils;
+
+#[derive(Default, Debug, Serialize, Deserialize)]
 pub struct DB<K: Hash + Eq, V>(HashMap<K, V>);
 
 impl<K, V> DB<K, V>
@@ -50,18 +49,9 @@ where
     V: DeserializeOwned + Serialize,
 {
     pub async fn to_json(&self, filepath: impl AsRef<Path>) -> io::Result<()> {
-        let file = File::create(filepath).await?;
-        let mut writer = BufWriter::<File>::new(file);
-        writer
-            .write(serde_json::to_string_pretty(self)?.as_bytes())
-            .await?;
-        Ok(())
+        utils::write_to_json(filepath, self).await
     }
     pub async fn from_json(filepath: impl AsRef<Path>) -> Option<Self> {
-        let file = File::open(filepath).await.ok()?;
-        let mut reader = BufReader::new(file);
-        let mut json = String::new();
-        reader.read_to_string(&mut json).await.ok()?;
-        serde_json::from_str(&json).ok()?
+        utils::read_from_json(filepath).await
     }
 }

@@ -7,18 +7,14 @@ pub async fn handler(
     login_model: Json<LoginModel>,
     db: &State<RwLock<DB<String, LoginModel>>>,
 ) -> Created<Json<LoginModel>> {
-    let login_model = login_model.into_inner();
-    let login_model = LoginModel {
-        name: login_model.name,
-        password: login_model.password,
-        email: login_model.email,
-        ..Default::default()
-    };
+    let mut login_model = login_model.into_inner();
+
+    login_model.id = db.read().await.len() as u32;
 
     let inserted_login_model = login_model.clone();
 
     db.write().await.insert(
-        format!("{}:{}", login_model.email, login_model.password,).clone(),
+        format!("{}:{}", login_model.email, login_model.password),
         inserted_login_model,
     );
 
