@@ -39,6 +39,8 @@ impl Default for Number {
 pub struct Product {
     #[serde(default)]
     pub id: u32,
+    #[serde(default)]
+    pub name: String,
     pub price: Number,
     pub old_price: Number,
     pub discount: Number,
