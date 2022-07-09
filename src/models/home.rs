@@ -1,11 +1,5 @@
-use std::path::Path;
-
-use rocket::{
-    serde::{Deserialize, Serialize},
-    tokio::io,
-};
-
-use crate::utils;
+use crate::utils::IJson;
+use rocket::serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 #[serde(crate = "rocket::serde")]
@@ -59,11 +53,4 @@ pub struct HomeModel {
     products: Vec<Product>,
 }
 
-impl HomeModel {
-    pub async fn to_json(&self, filepath: impl AsRef<Path>) -> io::Result<()> {
-        utils::write_to_json(filepath, self).await
-    }
-    pub async fn from_json(filepath: impl AsRef<Path>) -> Option<Self> {
-        utils::read_from_json(filepath).await
-    }
-}
+impl IJson for HomeModel {}

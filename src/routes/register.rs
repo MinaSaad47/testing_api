@@ -1,6 +1,6 @@
 use rocket::{post, response::status::Created, serde::json::Json, tokio::sync::RwLock, uri, State};
 
-use crate::{db::DB, models::login::LoginModel, routes};
+use crate::{db::DB, models::login::LoginModel, routes, utils::IJson};
 
 #[post("/register", format = "json", data = "<login_model>")]
 pub async fn handler(
@@ -18,7 +18,11 @@ pub async fn handler(
         inserted_login_model,
     );
 
-    db.read().await.to_json("login_model.json").await.unwrap();
+    db.read()
+        .await
+        .write_to_json("login_model.json")
+        .await
+        .unwrap();
 
     let location = uri!("/api", routes::login::handler());
     Created::new(location.to_string()).body(Json(login_model))

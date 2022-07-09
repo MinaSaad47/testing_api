@@ -3,8 +3,8 @@
 use rocket::tokio::sync::RwLock;
 use testing_api::{
     db::DB,
-    models::{home::HomeModel, login::LoginModel},
     routes,
+    utils::IJson,
 };
 
 #[macro_use]
@@ -12,10 +12,10 @@ extern crate rocket;
 
 #[launch]
 async fn launch() -> _ {
-    let login_model = DB::<String, LoginModel>::from_json("login_model.json")
+    let login_model = DB::<String, LoginModel>::read_from_json("login_model.json")
         .await
         .unwrap_or_default();
-    let home_model = HomeModel::from_json("home_model.json")
+    let home_model = HomeModel::read_from_json("home_model.json")
         .await
         .unwrap_or_default();
     rocket::build()
