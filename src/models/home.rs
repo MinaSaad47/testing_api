@@ -49,8 +49,8 @@ pub struct Product {
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 #[serde(crate = "rocket::serde")]
 pub struct HomeModel {
-    banners: Vec<Banner>,
-    products: Vec<Product>,
+    pub banners: Vec<Banner>,
+    pub products: Vec<Product>,
 }
 
 impl IJson for HomeModel {}
