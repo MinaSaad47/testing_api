@@ -30,6 +30,7 @@ async fn launch() -> _ {
                 routes::login::handler,
                 routes::home::handler,
                 routes::categories::handler,
+                routes::favorites::handler,
             ],
         )
         .manage(RwLock::new(login_model))
