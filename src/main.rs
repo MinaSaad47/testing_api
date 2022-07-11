@@ -33,6 +33,7 @@ async fn launch() -> _ {
                 routes::categories::handler,
                 routes::favorites::handler,
                 routes::update_profile::handler,
+                routes::search::handler,
             ],
         )
         .manage(RwLock::new(authorization))
