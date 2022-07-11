@@ -1,5 +1,5 @@
 use crate::{
-    models::home::{HomeModel, Product},
+    models::{home::{HomeModel, Product}, login::UserModel},
     response::Response,
     utils::IJson,
 };
@@ -30,6 +30,7 @@ impl Deref for ProductId {
 pub async fn handler(
     product_id: Json<ProductId>,
     home_model: &State<RwLock<HomeModel>>,
+    _user: UserModel,
 ) -> (Status, Json<Response<Product>>) {
     time::sleep(Duration::from_secs(1)).await;
     let product_id = product_id.into_inner();

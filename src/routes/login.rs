@@ -7,15 +7,16 @@ use rocket::{
 
 use std::time::Duration;
 
-use crate::{db::DB, models::login::LoginModel, response::Response};
+use crate::{db::DB, models::login::UserModel, response::Response};
 
-#[post("/login", format = "json", data = "<login_model>")]
+#[post("/login", format = "application/json", data = "<login_model>")]
 pub async fn handler(
-    login_model: Json<LoginModel>,
-    db: &State<RwLock<DB<String, LoginModel>>>,
-) -> Json<Response<LoginModel>> {
+    login_model: Json<UserModel>,
+    db: &State<RwLock<DB<String, UserModel>>>,
+    authorization: &State<RwLock<DB<String, String>>>,
+) -> Json<Response<UserModel>> {
+    let mut authorization = authorization.inner().write().await;
     time::sleep(Duration::from_secs(1)).await; // simulate remote server.
-    let login_model = login_model.into_inner();
     Json(
         db.read()
             .await
@@ -26,10 +27,14 @@ pub async fn handler(
                     status: false,
                     message: "could not log in, please be sure about the provided info".to_string(),
                 },
-                |model| Response {
-                    data: Some(model.clone()),
-                    status: true,
-                    message: "Logged in successfully".to_string(),
+                |model| {
+                    let key = format!("{}:{}", model.email, model.password);
+                    authorization.insert(base64::encode(&key), key);
+                    Response {
+                        data: Some(model.clone()),
+                        status: true,
+                        message: "Logged in successfully".to_string(),
+                    }
                 },
             ),
     )

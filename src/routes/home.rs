@@ -7,10 +7,16 @@ use rocket::{
     State,
 };
 
-use crate::{models::home::HomeModel, response::Response};
+use crate::{
+    models::{home::HomeModel, login::UserModel},
+    response::Response,
+};
 
 #[get("/home", format = "json")]
-pub async fn handler(home_model: &State<RwLock<HomeModel>>) -> Json<Response<HomeModel>> {
+pub async fn handler(
+    home_model: &State<RwLock<HomeModel>>,
+    _user: UserModel,
+) -> Json<Response<HomeModel>> {
     time::sleep(Duration::from_secs(1)).await;
     Json(Response {
         status: true,

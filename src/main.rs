@@ -3,7 +3,7 @@
 use rocket::tokio::sync::RwLock;
 use testing_api::{
     db::DB,
-    models::{categories::CategoriesModel, home::HomeModel, login::LoginModel},
+    models::{categories::CategoriesModel, home::HomeModel, login::UserModel},
     routes,
     utils::IJson,
 };
@@ -13,7 +13,8 @@ extern crate rocket;
 
 #[launch]
 async fn launch() -> _ {
-    let login_model = DB::<String, LoginModel>::read_from_json("login_model.json")
+    let authorization = DB::<String, String>::new();
+    let login_model = DB::<String, UserModel>::read_from_json("login_model.json")
         .await
         .unwrap_or_default();
     let home_model = HomeModel::read_from_json("home_model.json")
@@ -33,6 +34,7 @@ async fn launch() -> _ {
                 routes::favorites::handler,
             ],
         )
+        .manage(RwLock::new(authorization))
         .manage(RwLock::new(login_model))
         .manage(RwLock::new(home_model))
         .manage(RwLock::new(categories_model))
